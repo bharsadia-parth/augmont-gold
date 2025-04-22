@@ -11,7 +11,9 @@ export const getUsers = async (req: Request, res: Response) => {
       skip: offset,
       take: limit,
     });
-
+    if(!users.length){
+      res.status(204).send()
+    }
     res.status(200).json({ data: users });
   } catch (e) {
     console.error("Failed to fetch users:", e);
@@ -58,4 +60,17 @@ export const updateUserById = async  (req: Request, res: Response) => {
         console.error("Failed to update user", e)
         res.status(500).json({ error: "Failed to update user" });
       }
+}
+
+
+export const createUser = async  (req: Request, res: Response) => {
+  try{
+    const data: users = req.body;
+    const result = await client.users.create({ data});
+    res.status(200).json({msg:`User created with id '${result.id}'`, category: result});
+  }catch (e) {
+    console.error("Failed to create user", e)
+    res.status(500).json({ error: "Failed to create user" });
+  }
+
 }
