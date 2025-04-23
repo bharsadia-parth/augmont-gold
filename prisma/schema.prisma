@@ -24,4 +24,14 @@ model users{
 model categories{
   id    Int     @id @default(autoincrement())
   name String @unique
+  products products[]
+}
+
+model products{
+  id    Int     @id @default(autoincrement())
+  name String 
+  image String
+  price Float
+  category_id Int 
+  category categories @relation(fields: [category_id], references: [id])
 }
