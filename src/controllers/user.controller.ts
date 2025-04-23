@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import client from "../server";
 import { users } from "../../generated/prisma";
+import generatePassword from "../utils/password-generator";
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
@@ -65,8 +66,19 @@ export const updateUserById = async  (req: Request, res: Response) => {
 
 export const createUser = async  (req: Request, res: Response) => {
   try{
-    const data: users = req.body;
-    const result = await client.users.create({ data});
+    const {email, password} = req.body;
+    if(!email || !password){
+      res.status(400).json({"err":"invalid email or password"});
+      return;
+    }
+
+    const hash =  await generatePassword(password);
+
+    const result = await client.users.create({ data: {
+      email,
+      password: hash
+    }});
+    
     res.status(200).json({msg:`User created with id '${result.id}'`, category: result});
   }catch (e) {
     console.error("Failed to create user", e)

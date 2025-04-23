@@ -66,8 +66,14 @@ export const updateCategoryById = async  (req: Request, res: Response) => {
 
 export const createCategory = async  (req: Request, res: Response) => {
   try{
-    const data: categories = req.body;
-    const result = await client.categories.create({ data});
+    const {name} = req.body;
+    if (!name){
+      res.status(400).json({err:"Invalid field 'name'"});
+      return;
+    }
+    const result = await client.categories.create({ data: {
+      name
+    }});
     res.status(200).json({msg:`Category created with id '${result.id}'`, category: result});
   }catch (e) {
     console.error("Failed to create category", e)
