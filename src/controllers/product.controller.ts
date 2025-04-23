@@ -1,7 +1,8 @@
+import { parse } from "fast-csv";
 import { products } from "../../generated/prisma";
 import client from "../server";
 import { Request, Response } from "express";
-
+import fs from 'fs';
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -83,3 +84,37 @@ export const createProduct = async  (req: Request, res: Response) => {
     }
   
   }
+
+  export const bulkUploadProducts = async (req: Request, res: Response) => {
+    if (!req.file) {
+      res.status(400).send('File not found');
+      return;
+    } 
+  
+    const fileRows: any[] = [];
+    const filePath = req.file.path;
+  
+    fs.createReadStream(filePath)
+      .pipe(parse({ headers: true }))
+      .on('error', error => {
+        res.status(500).json({ message: error.message })
+        return ;
+      })
+      .on('data', row => {
+        fileRows.push({
+          name: row.name,
+          image: row.image,
+          price: parseFloat(row.price),
+          category_id: parseInt(row.category_id),
+        });
+      })
+      .on('end', async () => {
+        try {
+          await client.products.createMany({ data: fileRows });
+          fs.unlinkSync(filePath); 
+          res.status(200).json({ message: 'Products uploaded successfully' });
+        } catch (error) {
+          res.status(500).json({ message: 'DB Insert Failed', error });
+        }
+      });
+  };
