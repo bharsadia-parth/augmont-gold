@@ -108,6 +108,7 @@ DELETE - Delete product.
 | PUT	 | /product/:id	| Update an existing product |
 | DELETE | /product/:id	| Delete a product |
 | Post | /product/bulk-upload | Bulk upload Products |
+| Get | /product/generate-report | Get Csv of product|
 
 ### Bulk Upload Instructions
 
